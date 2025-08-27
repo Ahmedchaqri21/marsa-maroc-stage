@@ -1,0 +1,681 @@
+/* ==================================================
+   MARSA MAROC - SYSTÈME DE GESTION PORTUAIRE
+   Style unifié pour toutes les pages
+   ================================================== */
+
+/* ========== VARIABLES GLOBALES ========== */
+:root {
+    /* Couleurs principales - Thème maritime professionnel */
+    --primary-blue: #1a365d;
+    --secondary-blue: #2c5282;
+    --accent-blue: #3182ce;
+    --light-blue: #4299e1;
+    
+    /* Couleurs d'accent - Orange maritime */
+    --primary-orange: #ff6b35;
+    --secondary-orange: #f7931e;
+    
+    /* Couleurs neutres */
+    --white: #ffffff;
+    --light-gray: #f7fafc;
+    --medium-gray: #e2e8f0;
+    --dark-gray: #718096;
+    --text-dark: #2d3748;
+    
+    /* Couleurs de statut */
+    --success-green: #10b981;
+    --warning-orange: #f59e0b;
+    --danger-red: #ef4444;
+    --info-blue: #3b82f6;
+    
+    /* Typographie */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    
+    /* Espacements */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    
+    /* Rayons de bordure */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 50%;
+    
+    /* Ombres */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* ========== RESET ET BASE ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    line-height: 1.6;
+    color: var(--text-dark);
+    background-color: var(--light-gray);
+}
+
+/* ========== CLASSES UTILITAIRES ========== */
+
+/* Texte */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.text-white { color: var(--white); }
+.text-primary { color: var(--primary-blue); }
+.text-secondary { color: var(--secondary-blue); }
+.text-success { color: var(--success-green); }
+.text-warning { color: var(--warning-orange); }
+.text-danger { color: var(--danger-red); }
+
+/* Tailles de texte */
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+.text-3xl { font-size: var(--font-size-3xl); }
+
+/* Poids de police */
+.font-light { font-weight: 300; }
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+/* Backgrounds */
+.bg-primary { background-color: var(--primary-blue); }
+.bg-secondary { background-color: var(--secondary-blue); }
+.bg-accent { background-color: var(--accent-blue); }
+.bg-orange { background-color: var(--primary-orange); }
+.bg-white { background-color: var(--white); }
+.bg-light { background-color: var(--light-gray); }
+
+/* Gradients */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 50%, var(--accent-blue) 100%);
+}
+
+.bg-gradient-orange {
+    background: linear-gradient(45deg, var(--primary-orange), var(--secondary-orange));
+}
+
+/* Marges et padding */
+.m-0 { margin: 0; }
+.m-1 { margin: var(--spacing-xs); }
+.m-2 { margin: var(--spacing-sm); }
+.m-3 { margin: var(--spacing-md); }
+.m-4 { margin: var(--spacing-lg); }
+.m-5 { margin: var(--spacing-xl); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+.p-5 { padding: var(--spacing-xl); }
+
+/* ========== COMPOSANTS MARSA MAROC ========== */
+
+/* Logo et branding */
+.marsa-logo {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.marsa-logo-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--bg-gradient-orange);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: var(--font-size-2xl);
+}
+
+.marsa-title {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin: 0;
+}
+
+.marsa-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--dark-gray);
+    margin: 0;
+}
+
+/* Header uniforme */
+.marsa-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 1px solid var(--medium-gray);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.marsa-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Navigation */
+.marsa-nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--medium-gray);
+    box-shadow: var(--shadow-sm);
+}
+
+.marsa-nav-container {
+    display: flex;
+    gap: var(--spacing-xl);
+    padding: var(--spacing-md) var(--spacing-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+    overflow-x: auto;
+}
+
+.marsa-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    color: var(--dark-gray);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.marsa-nav-item:hover {
+    background: var(--light-gray);
+    color: var(--primary-blue);
+}
+
+.marsa-nav-item.active {
+    background: var(--bg-gradient-orange);
+    color: var(--white);
+}
+
+/* Boutons */
+.marsa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    line-height: 1;
+}
+
+.marsa-btn-primary {
+    background: var(--bg-gradient-primary);
+    color: var(--white);
+}
+
+.marsa-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.marsa-btn-secondary {
+    background: var(--white);
+    color: var(--primary-blue);
+    border: 2px solid var(--primary-blue);
+}
+
+.marsa-btn-secondary:hover {
+    background: var(--primary-blue);
+    color: var(--white);
+}
+
+.marsa-btn-orange {
+    background: var(--bg-gradient-orange);
+    color: var(--white);
+}
+
+.marsa-btn-orange:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.marsa-btn-danger {
+    background: var(--danger-red);
+    color: var(--white);
+}
+
+.marsa-btn-danger:hover {
+    background: #dc2626;
+}
+
+/* Tailles de boutons */
+.marsa-btn-sm {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+}
+
+.marsa-btn-lg {
+    padding: var(--spacing-lg) var(--spacing-2xl);
+    font-size: var(--font-size-lg);
+}
+
+/* Cards */
+.marsa-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.marsa-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.marsa-card-header {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom: 1px solid var(--medium-gray);
+    background: var(--light-gray);
+}
+
+.marsa-card-body {
+    padding: var(--spacing-xl);
+}
+
+.marsa-card-footer {
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-top: 1px solid var(--medium-gray);
+    background: var(--light-gray);
+}
+
+/* Formulaires */
+.marsa-form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.marsa-label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.marsa-input {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 2px solid var(--medium-gray);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    transition: all 0.3s ease;
+}
+
+.marsa-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.1);
+}
+
+.marsa-input.error {
+    border-color: var(--danger-red);
+}
+
+.marsa-select {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 2px solid var(--medium-gray);
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    background-color: var(--white);
+    cursor: pointer;
+}
+
+/* Tables */
+.marsa-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+}
+
+.marsa-table th,
+.marsa-table td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    text-align: left;
+    border-bottom: 1px solid var(--medium-gray);
+}
+
+.marsa-table th {
+    background: var(--light-gray);
+    font-weight: 600;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    font-size: var(--font-size-sm);
+    letter-spacing: 0.5px;
+}
+
+.marsa-table tr:hover {
+    background: var(--light-gray);
+}
+
+/* Badges de statut */
+.marsa-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.marsa-badge-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--success-green);
+    border: 1px solid var(--success-green);
+}
+
+.marsa-badge-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-orange);
+    border: 1px solid var(--warning-orange);
+}
+
+.marsa-badge-danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger-red);
+    border: 1px solid var(--danger-red);
+}
+
+.marsa-badge-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--info-blue);
+    border: 1px solid var(--info-blue);
+}
+
+/* Modals */
+.marsa-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.marsa-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.marsa-modal {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.9);
+    transition: all 0.3s ease;
+}
+
+.marsa-modal-overlay.show .marsa-modal {
+    transform: scale(1);
+}
+
+/* Alerts */
+.marsa-alert {
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    border-left: 4px solid;
+}
+
+.marsa-alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--success-green);
+    color: var(--success-green);
+}
+
+.marsa-alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: var(--warning-orange);
+    color: var(--warning-orange);
+}
+
+.marsa-alert-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: var(--danger-red);
+    color: var(--danger-red);
+}
+
+.marsa-alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: var(--info-blue);
+    color: var(--info-blue);
+}
+
+/* Loading states */
+.marsa-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.marsa-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: var(--radius-full);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Container principal */
+.marsa-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-xl);
+}
+
+.marsa-main-content {
+    padding: var(--spacing-2xl) 0;
+    min-height: calc(100vh - 200px);
+}
+
+/* Grid system */
+.marsa-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+}
+
+.marsa-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.marsa-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.marsa-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.marsa-grid-auto {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1024px) {
+    .marsa-grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .marsa-grid-3 { grid-template-columns: repeat(2, 1fr); }
+    
+    .marsa-header-content {
+        flex-direction: column;
+        gap: var(--spacing-lg);
+        text-align: center;
+    }
+    
+    .marsa-nav-container {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 768px) {
+    .marsa-grid-2,
+    .marsa-grid-3,
+    .marsa-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .marsa-header {
+        padding: var(--spacing-md);
+    }
+    
+    .marsa-nav-container {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+    }
+    
+    .marsa-nav-item {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+    
+    .marsa-card-body {
+        padding: var(--spacing-lg);
+    }
+    
+    .marsa-table th,
+    .marsa-table td {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    .marsa-container {
+        padding: 0 var(--spacing-md);
+    }
+    
+    .marsa-main-content {
+        padding: var(--spacing-lg) 0;
+    }
+    
+    .marsa-title {
+        font-size: var(--font-size-2xl);
+    }
+    
+    .marsa-btn {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.marsa-fade-in {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.marsa-slide-in {
+    animation: slideIn 0.6s ease-out;
+}
+
+/* ========== PRINT STYLES ========== */
+@media print {
+    .marsa-header,
+    .marsa-nav,
+    .marsa-btn,
+    .no-print {
+        display: none !important;
+    }
+    
+    .marsa-card {
+        box-shadow: none;
+        border: 1px solid var(--medium-gray);
+    }
+    
+    body {
+        background: var(--white);
+        color: var(--text-dark);
+    }
+}

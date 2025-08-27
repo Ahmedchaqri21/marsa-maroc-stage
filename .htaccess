@@ -1,0 +1,13 @@
+# Marsa Maroc Port Management System - Apache Configuration
+RewriteEngine On
+
+# Redirection vers index.php pour les routes inexistantes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Protection des dossiers sensibles
+RedirectMatch 403 ^/config/
+RedirectMatch 403 ^/classes/
+RedirectMatch 403 ^/utils/
+RedirectMatch 403 ^/logs/

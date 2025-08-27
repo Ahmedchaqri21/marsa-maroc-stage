@@ -1,0 +1,24 @@
+# Marsa Maroc - Fichiers à ignorer
+
+# Configuration sensible
+config/database.php
+.env
+
+# Logs
+logs/*.log
+logs/*.txt
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Vendor
+vendor/
+
+# Backup
+backup/*
+!backup/.gitkeep
+
+# IDE
+.vscode/
+.idea/

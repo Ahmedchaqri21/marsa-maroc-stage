@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        .test-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        button {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        .result {
+            background: rgba(0, 0, 0, 0.2);
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        h1, h2 { color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Test API Dashboard</h1>
+        
+        <div class="test-section">
+            <h2>1. Test de Base</h2>
+            <button onclick="testBasicConnectivity()">Test Connectivité de Base</button>
+            <button onclick="testSimplePHP()">Test PHP Simple</button>
+            <button onclick="testDatabaseConnection()">Test Connexion DB</button>
+            <button onclick="testInitDatabase()">Initialiser Base de Données</button>
+            <div id="basic-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Test des Vraies APIs</h2>
+            <button onclick="testReservationsRealAPI()">Test Réservations (Vraie DB)</button>
+            <button onclick="testEmplacementsRealAPI()">Test Emplacements (Vraie DB)</button>
+            <button onclick="testUsersRealAPI()">Test Utilisateurs (Vraie DB)</button>
+            <button onclick="testStatisticsRealAPI()">Test Statistiques (Vraie DB)</button>
+            <div id="real-api-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Test des APIs Originales</h2>
+            <button onclick="testReservationsAPI()">Test Réservations</button>
+            <button onclick="testEmplacementsAPI()">Test Emplacements</button>
+            <button onclick="testUsersAPI()">Test Utilisateurs</button>
+            <div id="api-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Test des APIs Corrigées</h2>
+            <button onclick="testReservationsFixedAPI()">Test Réservations Corrigées</button>
+            <button onclick="testEmplacementsFixedAPI()">Test Emplacements Corrigées</button>
+            <div id="fixed-api-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Test des APIs de Test</h2>
+            <button onclick="testReservationsTestAPI()">Test Réservations (Test)</button>
+            <button onclick="testEmplacementsTestAPI()">Test Emplacements (Test)</button>
+            <div id="test-api-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Diagnostic de Débogage</h2>
+            <button onclick="testDebugAPI()">Test Script de Debug</button>
+            <div id="debug-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = './api/';
+        
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.className = `result ${isError ? 'error' : 'success'}`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        async function testBasicConnectivity() {
+            log('basic-result', 'Test de connectivité de base...', false);
+            try {
+                const response = await fetch('./index.php');
+                log('basic-result', `Status: ${response.status}`, false);
+                log('basic-result', `Content-Type: ${response.headers.get('content-type')}`, false);
+                log('basic-result', 'Connectivité de base: ✓ OK', false);
+            } catch (error) {
+                log('basic-result', `Erreur de connectivité: ${error.message}`, true);
+            }
+        }
+
+        async function testSimplePHP() {
+            log('basic-result', 'Test PHP simple...', false);
+            try {
+                const response = await fetch('./simple-test.php');
+                log('basic-result', `Status: ${response.status}`, false);
+                log('basic-result', `Content-Type: ${response.headers.get('content-type')}`, false);
+                
+                const text = await response.text();
+                log('basic-result', `Response: ${text}`, false);
+                
+                // Essayer de parser comme JSON
+                try {
+                    const cleanText = text.replace(/^[^{]*/, ''); // Supprimer tout avant le premier {
+                    const data = JSON.parse(cleanText);
+                    log('basic-result', 'PHP Test: ✓ JSON valide après nettoyage', false);
+                } catch (jsonError) {
+                    log('basic-result', 'PHP Test: ✗ Impossible de parser en JSON', true);
+                }
+            } catch (error) {
+                log('basic-result', `Erreur PHP Test: ${error.message}`, true);
+            }
+        }
+
+        async function testAPI(url, resultElementId, label) {
+            log(resultElementId, `Test ${label}...`, false);
+            try {
+                const response = await fetch(url);
+                log(resultElementId, `Status: ${response.status}`, false);
+                log(resultElementId, `Content-Type: ${response.headers.get('content-type')}`, false);
+                
+                const text = await response.text();
+                log(resultElementId, `Response length: ${text.length} caractères`, false);
+                
+                if (response.headers.get('content-type')?.includes('application/json')) {
+                    try {
+                        const data = JSON.parse(text);
+                        log(resultElementId, `${label}: ✓ JSON valide`, false);
+                        log(resultElementId, `Data: ${JSON.stringify(data, null, 2)}`, false);
+                    } catch (jsonError) {
+                        log(resultElementId, `${label}: ✗ JSON invalide`, true);
+                        log(resultElementId, `Response: ${text.substring(0, 500)}...`, true);
+                    }
+                } else {
+                    log(resultElementId, `${label}: ✗ Pas du JSON`, true);
+                    log(resultElementId, `Response: ${text.substring(0, 500)}...`, true);
+                }
+            } catch (error) {
+                log(resultElementId, `${label}: ✗ ${error.message}`, true);
+            }
+        }
+
+        async function testReservationsAPI() {
+            await testAPI(API_BASE + 'reservations.php', 'api-result', 'Réservations API');
+        }
+
+        async function testEmplacementsAPI() {
+            await testAPI(API_BASE + 'emplacements.php', 'api-result', 'Emplacements API');
+        }
+
+        async function testUsersAPI() {
+            await testAPI(API_BASE + 'users.php', 'api-result', 'Users API');
+        }
+
+        async function testInitDatabase() {
+            log('basic-result', 'Initialisation de la base de données...', false);
+            try {
+                const response = await fetch('./init-database.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('basic-result', '✓ Base de données initialisée', false);
+                    log('basic-result', `Message: ${data.message}`, false);
+                } else {
+                    log('basic-result', '✗ Erreur initialisation DB', true);
+                    log('basic-result', `Erreur: ${data.error}`, true);
+                }
+            } catch (error) {
+                log('basic-result', `Erreur init DB: ${error.message}`, true);
+            }
+        }
+
+        async function testReservationsRealAPI() {
+            await testAPI(API_BASE + 'reservations-real.php', 'real-api-result', 'Réservations Real API');
+        }
+
+        async function testEmplacementsRealAPI() {
+            await testAPI(API_BASE + 'emplacements-real.php', 'real-api-result', 'Emplacements Real API');
+        }
+
+        async function testUsersRealAPI() {
+            await testAPI(API_BASE + 'users-real.php', 'real-api-result', 'Users Real API');
+        }
+
+        async function testStatisticsRealAPI() {
+            await testAPI(API_BASE + 'statistics-real.php', 'real-api-result', 'Statistics Real API');
+        }
+
+        async function testDatabaseConnection() {
+            log('basic-result', 'Test de connexion à la base de données...', false);
+            try {
+                const response = await fetch('./test-db.php');
+                log('basic-result', `Status: ${response.status}`, false);
+                
+                const text = await response.text();
+                log('basic-result', `Response: ${text}`, false);
+                
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        log('basic-result', '✓ Connexion DB: OK', false);
+                        log('basic-result', `Message: ${data.message}`, false);
+                    } else {
+                        log('basic-result', '✗ Connexion DB: ERREUR', true);
+                        log('basic-result', `Erreur: ${data.error}`, true);
+                    }
+                } catch (jsonError) {
+                    log('basic-result', '✗ Réponse DB invalide', true);
+                }
+            } catch (error) {
+                log('basic-result', `Erreur test DB: ${error.message}`, true);
+            }
+        }
+
+        async function testReservationsFixedAPI() {
+            await testAPI(API_BASE + 'reservations-fixed.php', 'fixed-api-result', 'Réservations Fixed API');
+        }
+
+        async function testEmplacementsFixedAPI() {
+            await testAPI(API_BASE + 'emplacements-fixed.php', 'fixed-api-result', 'Emplacements Fixed API');
+        }
+
+        async function testReservationsTestAPI() {
+            await testAPI(API_BASE + 'reservations-test.php', 'test-api-result', 'Réservations Test API');
+        }
+
+        async function testEmplacementsTestAPI() {
+            await testAPI(API_BASE + 'emplacements-test.php', 'test-api-result', 'Emplacements Test API');
+        }
+
+        async function testDebugAPI() {
+            await testAPI('./debug-api.php', 'debug-result', 'Debug Script');
+        }
+
+        // Test automatique au chargement
+        window.addEventListener('load', () => {
+            log('basic-result', 'Page chargée. Prêt pour les tests.', false);
+        });
+    </script>
+</body>
+</html>
