@@ -1,0 +1,56 @@
+# Docker ignore file for Marsa Maroc Port Management System
+
+# Git files
+.git
+.gitignore
+README.md
+*.md
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# Node modules (if any)
+node_modules/
+
+# Backup files
+backup/
+*.bak
+*.backup
+
+# Test files
+tests/
+test-*.php
+
+# Development scripts
+*.bat
+*.ps1
+*.sh
+direct-*.php
+verify-*.bat
+git-push.*
+
+# Documentation
+CORRECTIONS-*.md
+FIX-*.md
+FIXES-*.md
+GITHUB-*.md
+MAIN-*.md
+MODAL-*.md
+RESOLUTION-*.md
+STRUCTURE-*.md

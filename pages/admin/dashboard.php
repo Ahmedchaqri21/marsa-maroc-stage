@@ -1480,16 +1480,6 @@ $user_role = $_SESSION['role'];
                     <i class="fas fa-users"></i> Utilisateurs
                 </div>
             </div>
-            
-            <div class="nav-section">
-                <div class="nav-title">Rapports</div>
-                <div class="nav-item" onclick="showSection('statistics')">
-                    <i class="fas fa-chart-line"></i> Statistiques
-                </div>
-                <div class="nav-item" onclick="showSection('reports')">
-                    <i class="fas fa-file-alt"></i> Rapports
-                </div>
-            </div>
         </aside>
 
         <!-- Main Content -->
@@ -1708,23 +1698,6 @@ $user_role = $_SESSION['role'];
                 </div>
             </div>
 
-            <!-- Statistics Section -->
-            <div id="statistics-section" style="display: none;">
-                <h2 class="section-title">Statistiques</h2>
-                <div class="chart-placeholder">
-                    <i class="fas fa-chart-bar" style="font-size: 2rem; margin-right: 1rem;"></i>
-                    Section Statistiques (à développer)
-                </div>
-            </div>
-
-            <!-- Reports Section -->
-            <div id="reports-section" style="display: none;">
-                <h2 class="section-title">Rapports</h2>
-                <div class="chart-placeholder">
-                    <i class="fas fa-file-alt" style="font-size: 2rem; margin-right: 1rem;"></i>
-                    Section Rapports (à développer)
-                </div>
-            </div>
         </main>
     </div>
     
@@ -1782,7 +1755,7 @@ $user_role = $_SESSION['role'];
         // Navigation entre sections
         function showSection(sectionName) {
             // Cacher toutes les sections
-            const sections = ['overview', 'emplacements', 'reservations', 'users', 'statistics', 'reports'];
+            const sections = ['overview', 'emplacements', 'reservations', 'users'];
             sections.forEach(section => {
                 const element = document.getElementById(section + '-section');
                 if (element) element.style.display = 'none';
@@ -2202,6 +2175,50 @@ $user_role = $_SESSION['role'];
             }
         }
 
+        // Fonction pour récupérer les utilisateurs
+        async function fetchUsers() {
+            try {
+                console.log('Récupération des utilisateurs...');
+                
+                // Utiliser l'API users-real
+                const response = await fetch('../../api/users-real.php');
+                
+                console.log('Statut de la réponse:', response.status, response.statusText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+                
+                const responseText = await response.text();
+                console.log('Réponse brute:', responseText);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error(`Erreur de parsing JSON: ${e.message}`);
+                }
+                
+                console.log('Résultat parsé:', result);
+                
+                // Normaliser le format de la réponse
+                let users = [];
+                
+                if (result && result.success === true && Array.isArray(result.data)) {
+                    users = result.data;
+                } else if (Array.isArray(result)) {
+                    users = result;
+                } else {
+                    throw new Error('Format de données inattendu');
+                }
+                
+                return users;
+            } catch (error) {
+                console.error('Erreur lors de la récupération des utilisateurs:', error);
+                throw error;
+            }
+        }
+
         // Fonction pour charger les réservations
         async function loadReservations() {
             try {
@@ -2218,7 +2235,7 @@ $user_role = $_SESSION['role'];
                         row.innerHTML = `
                             <td>${res.id}</td>
                             <td>${res.numero_reservation || '-'}</td>
-                            <td>${res.client_name || '-'}</td>
+                            <td>${res.utilisateur_nom || '-'}</td>
                             <td>${res.emplacement_nom || '-'}</td>
                             <td>${formatDate(res.date_debut)}</td>
                             <td>${formatDate(res.date_fin)}</td>
@@ -2232,11 +2249,10 @@ $user_role = $_SESSION['role'];
                                     <button data-action="reject-reservation" data-id="${res.id}" class="action-btn delete-btn">
                                         <i class="fas fa-times"></i>
                                     </button>
-                                ` : `
-                                    <button data-action="view-reservation" data-id="${res.id}" class="action-btn view-btn">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                `}
+                                ` : ''}
+                                <button data-action="view-reservation" data-id="${res.id}" class="action-btn view-btn">
+                                    <i class="fas fa-eye"></i>
+                                </button>
                             </td>
                         `;
                         tbody.appendChild(row);
@@ -2260,8 +2276,8 @@ $user_role = $_SESSION['role'];
             try {
                 console.log('Récupération des réservations...');
                 
-                // Utiliser l'API fixée
-                const response = await fetch('../../api/reservations-fixed.php');
+                // Utiliser l'API real
+                const response = await fetch('../../api/reservations-real.php');
                 
                 console.log('Statut de la réponse:', response.status, response.statusText);
                 
@@ -2469,11 +2485,11 @@ $user_role = $_SESSION['role'];
         });
         
         document.getElementById('add-reservation-btn').addEventListener('click', function() {
-            showNotification("Ajout d'une nouvelle réservation (fonctionnalité à venir)", 'info');
+            showReservationModal();
         });
         
         document.getElementById('add-user-btn').addEventListener('click', function() {
-            showNotification("Ajout d'un nouvel utilisateur (fonctionnalité à venir)", 'info');
+            showUserModal();
         });
         
         // Charger la vue d'ensemble au chargement de la page
@@ -2979,6 +2995,190 @@ $user_role = $_SESSION['role'];
                 closeEmplacementModal();
             }
         });
+
+        // Fonctions pour la gestion des réservations
+        function showReservationModal(reservation = null) {
+            const modal = document.getElementById('reservationModal');
+            const form = document.getElementById('add-reservation-form');
+            const title = document.querySelector('#reservationModalTitle');
+            const submitBtn = document.getElementById('submitReservationBtn');
+            
+            if (!modal || !form) {
+                console.error("Modal ou formulaire de réservation non trouvé");
+                return;
+            }
+            
+            // Réinitialiser le formulaire
+            form.reset();
+            
+            // Charger les emplacements disponibles et les utilisateurs
+            loadAvailableEmplacements();
+            loadAvailableUsers();
+            
+            if (reservation) {
+                // Mode édition
+                title.textContent = 'Modifier une Réservation';
+                submitBtn.innerHTML = '<span class="loading-spinner"></span><i class="fas fa-edit"></i> Modifier';
+            } else {
+                // Mode création
+                title.textContent = 'Nouvelle Réservation';
+                submitBtn.innerHTML = '<span class="loading-spinner"></span><i class="fas fa-save"></i> Enregistrer';
+            }
+            
+            // Afficher le modal avec animation
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        function closeReservationModal() {
+            const modal = document.getElementById('reservationModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        // Fonction pour charger les emplacements disponibles
+        async function loadAvailableEmplacements() {
+            try {
+                const emplacements = await fetchEmplacements();
+                const select = document.getElementById('reservation_emplacement_id');
+                
+                if (!select) return;
+                
+                // Vider le select
+                select.innerHTML = '<option value="">Sélectionner un emplacement</option>';
+                
+                // Ajouter les emplacements disponibles
+                emplacements.forEach(emplacement => {
+                    if (emplacement.etat === 'disponible') {
+                        const option = document.createElement('option');
+                        option.value = emplacement.id;
+                        option.textContent = `${emplacement.code} - ${emplacement.nom}`;
+                        select.appendChild(option);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des emplacements:', error);
+                showNotification('Erreur lors du chargement des emplacements', 'error');
+            }
+        }
+
+        // Fonction pour charger les utilisateurs disponibles
+        async function loadAvailableUsers() {
+            try {
+                const users = await fetchUsers();
+                const select = document.getElementById('reservation_user_id');
+                
+                if (!select) return;
+                
+                // Vider le select
+                select.innerHTML = '<option value="">Sélectionner un client</option>';
+                
+                // Ajouter les utilisateurs actifs
+                users.forEach(user => {
+                    if (user.status === 'active' && user.role === 'user') {
+                        const option = document.createElement('option');
+                        option.value = user.id;
+                        option.textContent = `${user.full_name} (${user.company_name || user.email})`;
+                        select.appendChild(option);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Erreur lors du chargement des utilisateurs:', error);
+                showNotification('Erreur lors du chargement des utilisateurs', 'error');
+            }
+        }
+
+        // Fonctions pour la gestion des utilisateurs
+        function showUserModal(user = null) {
+            const modal = document.getElementById('userModal');
+            const form = document.getElementById('add-user-form');
+            const title = document.querySelector('#userModalTitle');
+            const submitBtn = document.getElementById('submitUserBtn');
+            
+            if (!modal || !form) {
+                console.error("Modal ou formulaire d'utilisateur non trouvé");
+                return;
+            }
+            
+            // Réinitialiser le formulaire
+            form.reset();
+            
+            if (user) {
+                // Mode édition
+                title.textContent = 'Modifier un Utilisateur';
+                submitBtn.innerHTML = '<span class="loading-spinner"></span><i class="fas fa-edit"></i> Modifier';
+                
+                // Pré-remplir le formulaire avec les données de l'utilisateur
+                document.getElementById('user_nom').value = user.nom || '';
+                document.getElementById('user_prenom').value = user.prenom || '';
+                document.getElementById('user_email').value = user.email || '';
+                document.getElementById('user_username').value = user.username || '';
+                document.getElementById('user_role').value = user.role || '';
+                document.getElementById('user_entreprise').value = user.entreprise || '';
+                document.getElementById('user_telephone').value = user.telephone || '';
+                
+                // Masquer le champ mot de passe en mode édition
+                const passwordField = document.getElementById('user_password');
+                const passwordGroup = passwordField.closest('.form-group');
+                if (passwordGroup) {
+                    passwordGroup.style.display = 'none';
+                }
+                passwordField.required = false;
+                
+                // Ajouter l'ID caché pour l'édition
+                let idInput = document.getElementById('user-id');
+                if (!idInput) {
+                    idInput = document.createElement('input');
+                    idInput.type = 'hidden';
+                    idInput.id = 'user-id';
+                    idInput.name = 'id';
+                    form.appendChild(idInput);
+                }
+                idInput.value = user.id;
+            } else {
+                // Mode création
+                title.textContent = 'Nouvel Utilisateur';
+                submitBtn.innerHTML = '<span class="loading-spinner"></span><i class="fas fa-save"></i> Enregistrer';
+                
+                // Afficher le champ mot de passe en mode création
+                const passwordField = document.getElementById('user_password');
+                const passwordGroup = passwordField.closest('.form-group');
+                if (passwordGroup) {
+                    passwordGroup.style.display = 'block';
+                }
+                passwordField.required = true;
+                
+                // Supprimer l'ID caché s'il existe
+                const idInput = document.getElementById('user-id');
+                if (idInput) {
+                    idInput.parentNode.removeChild(idInput);
+                }
+            }
+            
+            // Afficher le modal avec animation
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+        }
+
+        function closeUserModal() {
+            const modal = document.getElementById('userModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
     </script>
     
     <div class="notification-container" id="notification-container"></div>
@@ -3127,5 +3327,532 @@ $user_role = $_SESSION['role'];
             </div>
         </div>
     </div>
+
+    <!-- Modal pour ajouter une réservation -->
+    <div class="modal" id="reservationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="reservationModalTitle">Nouvelle Réservation</h2>
+                <span class="close-modal" onclick="closeReservationModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-reservation-form">
+                    <div class="form-group">
+                        <label for="reservation_user_id">Client</label>
+                        <select id="reservation_user_id" name="user_id" required>
+                            <option value="">Sélectionner un client</option>
+                        </select>
+                        <i class="field-icon fas fa-user"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Client requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservation_emplacement_id">Emplacement</label>
+                        <select id="reservation_emplacement_id" name="emplacement_id" required>
+                            <option value="">Sélectionner un emplacement</option>
+                        </select>
+                        <i class="field-icon fas fa-map-marker-alt"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Emplacement requis</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reservation_date_debut">Date de début</label>
+                            <input type="datetime-local" id="reservation_date_debut" name="date_debut" required>
+                            <i class="field-icon fas fa-calendar-alt"></i>
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Date de début requise</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reservation_date_fin">Date de fin</label>
+                            <input type="datetime-local" id="reservation_date_fin" name="date_fin" required>
+                            <i class="field-icon fas fa-calendar-alt"></i>
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Date de fin requise</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservation_navire_nom">Nom du navire</label>
+                        <input type="text" id="reservation_navire_nom" name="navire_nom" required placeholder="Ex: Marsa Express" maxlength="100">
+                        <i class="field-icon fas fa-ship"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Nom du navire requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservation_type_marchandise">Type de marchandise</label>
+                        <select id="reservation_type_marchandise" name="type_marchandise" required>
+                            <option value="">Sélectionner le type</option>
+                            <option value="conteneurs">Conteneurs</option>
+                            <option value="vrac_solide">Vrac solide</option>
+                            <option value="vrac_liquide">Vrac liquide</option>
+                            <option value="roulier">Roulier</option>
+                            <option value="general">Marchandise générale</option>
+                        </select>
+                        <i class="field-icon fas fa-boxes"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Type de marchandise requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reservation_description">Description (optionnel)</label>
+                        <textarea id="reservation_description" name="description" placeholder="Informations supplémentaires sur la réservation..." rows="3" maxlength="500"></textarea>
+                        <i class="field-icon fas fa-comment"></i>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeReservationModal()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <button type="submit" class="add-btn" id="submitReservationBtn">
+                            <span class="loading-spinner"></span>
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter un utilisateur -->
+    <div class="modal" id="userModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">Nouvel Utilisateur</h2>
+                <span class="close-modal" onclick="closeUserModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="add-user-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="user_nom">Nom</label>
+                            <input type="text" id="user_nom" name="nom" required placeholder="Ex: Benali" maxlength="50">
+                            <i class="field-icon fas fa-user"></i>
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Nom requis</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="user_prenom">Prénom</label>
+                            <input type="text" id="user_prenom" name="prenom" required placeholder="Ex: Ahmed" maxlength="50">
+                            <i class="field-icon fas fa-user"></i>
+                            <div class="error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>Prénom requis</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_email">Email</label>
+                        <input type="email" id="user_email" name="email" required placeholder="Ex: ahmed.benali@entreprise.ma" maxlength="100">
+                        <i class="field-icon fas fa-envelope"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Email valide requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_username">Nom d'utilisateur</label>
+                        <input type="text" id="user_username" name="username" required placeholder="Ex: abenali" maxlength="50">
+                        <i class="field-icon fas fa-at"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Nom d'utilisateur requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_password">Mot de passe</label>
+                        <input type="password" id="user_password" name="password" required placeholder="Mot de passe sécurisé" minlength="6">
+                        <i class="field-icon fas fa-lock"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Mot de passe requis (min 6 caractères)</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_role">Rôle</label>
+                        <select id="user_role" name="role" required>
+                            <option value="">Sélectionner le rôle</option>
+                            <option value="user">👤 Utilisateur</option>
+                            <option value="manager">👨‍💼 Manager</option>
+                            <option value="admin">👑 Administrateur</option>
+                        </select>
+                        <i class="field-icon fas fa-user-tag"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Rôle requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_entreprise">Entreprise</label>
+                        <input type="text" id="user_entreprise" name="entreprise" placeholder="Ex: Marsa Maroc" maxlength="100">
+                        <i class="field-icon fas fa-building"></i>
+                    </div>
+                    <div class="form-group">
+                        <label for="user_telephone">Téléphone</label>
+                        <input type="tel" id="user_telephone" name="telephone" placeholder="Ex: +212 6 12 34 56 78" maxlength="20">
+                        <i class="field-icon fas fa-phone"></i>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn-cancel" onclick="closeUserModal()">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                        <button type="submit" class="add-btn" id="submitUserBtn">
+                            <span class="loading-spinner"></span>
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gestionnaires d'événements pour les formulaires de réservation et utilisateur
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestionnaire pour le formulaire de réservation
+            const reservationForm = document.getElementById('add-reservation-form');
+            if (reservationForm) {
+                reservationForm.addEventListener('submit', handleReservationSubmit);
+            }
+
+            // Gestionnaire pour le formulaire d'utilisateur
+            const userForm = document.getElementById('add-user-form');
+            if (userForm) {
+                userForm.addEventListener('submit', handleUserSubmit);
+            }
+
+            // Gestionnaires pour les boutons d'action
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('action-btn') || e.target.closest('.action-btn')) {
+                    const button = e.target.classList.contains('action-btn') ? e.target : e.target.closest('.action-btn');
+                    const action = button.getAttribute('data-action');
+                    const id = button.getAttribute('data-id');
+                    
+                    handleActionButton(action, id);
+                }
+            });
+        });
+
+        // Fonction pour gérer la soumission du formulaire de réservation
+        async function handleReservationSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = document.getElementById('submitReservationBtn');
+            
+            try {
+                // Afficher le loader
+                submitBtn.querySelector('.loading-spinner').style.display = 'inline-block';
+                submitBtn.disabled = true;
+
+                // Collecter les données du formulaire
+                const formData = new FormData(form);
+                
+                // Calculer le montant total basé sur l'emplacement et la durée
+                const dateDebut = new Date(formData.get('date_debut'));
+                const dateFin = new Date(formData.get('date_fin'));
+                const dureeJours = Math.ceil((dateFin - dateDebut) / (1000 * 60 * 60 * 24));
+                
+                // Pour l'instant, on utilise un tarif fixe de 500 MAD par jour
+                // Plus tard, on pourra récupérer le tarif réel de l'emplacement
+                const montantTotal = dureeJours * 500;
+
+                const reservationData = {
+                    user_id: formData.get('user_id'),
+                    emplacement_id: formData.get('emplacement_id'),
+                    date_debut: formData.get('date_debut'),
+                    date_fin: formData.get('date_fin'),
+                    montant_total: montantTotal,
+                    commentaire: formData.get('description') || ''
+                };
+
+                // Envoyer les données à l'API
+                const response = await fetch('../../api/reservations-real.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(reservationData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Réservation créée avec succès', 'success');
+                    closeReservationModal();
+                    form.reset();
+                    // Recharger les réservations si on est sur cette section
+                    if (document.getElementById('reservations-section').style.display !== 'none') {
+                        loadReservations();
+                    }
+                    // Mettre à jour les statistiques
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Erreur lors de la création de la réservation');
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification(error.message, 'error');
+            } finally {
+                // Masquer le loader
+                submitBtn.querySelector('.loading-spinner').style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Fonction pour gérer la soumission du formulaire d'utilisateur
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = document.getElementById('submitUserBtn');
+            
+            try {
+                // Afficher le loader
+                submitBtn.querySelector('.loading-spinner').style.display = 'inline-block';
+                submitBtn.disabled = true;
+
+                // Collecter les données du formulaire
+                const formData = new FormData(form);
+                const userData = {
+                    username: formData.get('username'),
+                    email: formData.get('email'),
+                    full_name: formData.get('full_name'),
+                    password: formData.get('password'),
+                    role: formData.get('role'),
+                    company_name: formData.get('entreprise') || '',
+                    phone: formData.get('telephone') || ''
+                };
+
+                // Envoyer les données à l'API
+                const response = await fetch('../../api/users-real.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Utilisateur créé avec succès', 'success');
+                    closeUserModal();
+                    form.reset();
+                    // Recharger les utilisateurs si on est sur cette section
+                    if (document.getElementById('users-section').style.display !== 'none') {
+                        loadUsers();
+                    }
+                    // Mettre à jour les statistiques
+                    loadStats();
+                } else {
+                    throw new Error(result.message || 'Erreur lors de la création de l\'utilisateur');
+                }
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification(error.message, 'error');
+            } finally {
+                // Masquer le loader
+                submitBtn.querySelector('.loading-spinner').style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Fonction pour gérer les boutons d'action
+        async function handleActionButton(action, id) {
+            switch (action) {
+                case 'edit-emplacement':
+                    await editEmplacement(id);
+                    break;
+                case 'delete-emplacement':
+                    await deleteEmplacement(id);
+                    break;
+                case 'validate-reservation':
+                    await validateReservation(id);
+                    break;
+                case 'reject-reservation':
+                    await rejectReservation(id);
+                    break;
+                case 'view-reservation':
+                    await viewReservation(id);
+                    break;
+                case 'edit-user':
+                    await editUser(id);
+                    break;
+                case 'delete-user':
+                    await deleteUser(id);
+                    break;
+                default:
+                    console.warn('Action non reconnue:', action);
+            }
+        }
+
+        // Fonctions spécifiques pour chaque action
+        async function editEmplacement(id) {
+            try {
+                const response = await fetch(`../../api/emplacements-fixed.php?id=${id}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    showEmplacementModal(result.data);
+                } else {
+                    throw new Error('Impossible de charger les données de l\'emplacement');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors du chargement de l\'emplacement', 'error');
+            }
+        }
+
+        async function deleteEmplacement(id) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet emplacement ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`../../api/emplacements-fixed.php?id=${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Emplacement supprimé avec succès', 'success');
+                    loadEmplacements();
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Erreur lors de la suppression');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification(error.message, 'error');
+            }
+        }
+
+        async function validateReservation(id) {
+            try {
+                const response = await fetch('../../api/reservations-real.php', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        statut: 'validee'
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Réservation validée avec succès', 'success');
+                    loadReservations();
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Erreur lors de la validation');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification(error.message, 'error');
+            }
+        }
+
+        async function rejectReservation(id) {
+            if (!confirm('Êtes-vous sûr de vouloir rejeter cette réservation ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('../../api/reservations-real.php', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        statut: 'refusee'
+                    })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Réservation rejetée', 'success');
+                    loadReservations();
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Erreur lors du rejet');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification(error.message, 'error');
+            }
+        }
+
+        async function viewReservation(id) {
+            try {
+                const response = await fetch(`../../api/reservations-real.php?id=${id}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // Ouvrir le modal en mode lecture seule
+                    showReservationModal(result.data, true);
+                } else {
+                    throw new Error('Impossible de charger les données de la réservation');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors du chargement de la réservation', 'error');
+            }
+        }
+
+        async function editUser(id) {
+            try {
+                const response = await fetch(`../../api/users-real.php?id=${id}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    showUserModal(result.data);
+                } else {
+                    throw new Error('Impossible de charger les données de l\'utilisateur');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification('Erreur lors du chargement de l\'utilisateur', 'error');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`../../api/users-real.php?id=${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Utilisateur supprimé avec succès', 'success');
+                    loadUsers();
+                    loadStats();
+                } else {
+                    throw new Error(result.error || 'Erreur lors de la suppression');
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                showNotification(error.message, 'error');
+            }
+        }
+    </script>
 </body>
 </html>

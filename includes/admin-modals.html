@@ -1,0 +1,188 @@
+<!-- Modal pour les réservations -->
+<div class="modal" id="reservationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="reservationModalTitle">Nouvelle Réservation</h2>
+            <span class="close-modal" onclick="closeReservationModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="reservation-form">
+                <div class="form-group">
+                    <label for="res-user-id">Client</label>
+                    <select id="res-user-id" name="user_id" required>
+                        <option value="">-- Sélectionnez un client --</option>
+                    </select>
+                    <i class="field-icon fas fa-user"></i>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Client requis</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="res-emplacement-id">Emplacement</label>
+                    <select id="res-emplacement-id" name="emplacement_id" required>
+                        <option value="">-- Sélectionnez un emplacement --</option>
+                    </select>
+                    <i class="field-icon fas fa-anchor"></i>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Emplacement requis</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="res-date-debut">Date de début</label>
+                        <input type="datetime-local" id="res-date-debut" name="date_debut" required>
+                        <i class="field-icon fas fa-calendar-alt"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Date de début requise</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="res-date-fin">Date de fin</label>
+                        <input type="datetime-local" id="res-date-fin" name="date_fin" required>
+                        <i class="field-icon fas fa-calendar-alt"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Date de fin requise</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="res-commentaire">Commentaires</label>
+                    <textarea id="res-commentaire" name="commentaire" rows="3" placeholder="Commentaires additionnels..."></textarea>
+                    <i class="field-icon fas fa-comment"></i>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeReservationModal()">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button type="submit" class="add-btn" id="submitReservationBtn">
+                        <span class="loading-spinner"></span>
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour les utilisateurs -->
+<div class="modal" id="userModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="userModalTitle">Nouvel Utilisateur</h2>
+            <span class="close-modal" onclick="closeUserModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="user-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-username">Nom d'utilisateur</label>
+                        <input type="text" id="user-username" name="username" required placeholder="Ex: mohammed.alami" maxlength="50">
+                        <i class="field-icon fas fa-user"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Nom d'utilisateur requis</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-email">Email</label>
+                        <input type="email" id="user-email" name="email" required placeholder="exemple@email.com" maxlength="100">
+                        <i class="field-icon fas fa-envelope"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Email valide requis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-full-name">Nom complet</label>
+                    <input type="text" id="user-full-name" name="full_name" required placeholder="Ex: Mohammed Alami" maxlength="100">
+                    <i class="field-icon fas fa-signature"></i>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Nom complet requis</span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-phone">Téléphone</label>
+                        <input type="tel" id="user-phone" name="phone" placeholder="+212 6XX XX XX XX" maxlength="20">
+                        <i class="field-icon fas fa-phone"></i>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-role">Rôle</label>
+                        <select id="user-role" name="role" required>
+                            <option value="">-- Sélectionnez un rôle --</option>
+                            <option value="user">👤 Utilisateur</option>
+                            <option value="manager">👨‍💼 Manager</option>
+                            <option value="admin">👑 Administrateur</option>
+                        </select>
+                        <i class="field-icon fas fa-user-tag"></i>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>Rôle requis</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-company">Société</label>
+                    <input type="text" id="user-company" name="company_name" placeholder="Nom de la société" maxlength="100">
+                    <i class="field-icon fas fa-building"></i>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="user-tax-id">ID Fiscal</label>
+                        <input type="text" id="user-tax-id" name="tax_id" placeholder="Numéro d'identification fiscale" maxlength="50">
+                        <i class="field-icon fas fa-file-invoice"></i>
+                    </div>
+                    <div class="form-group">
+                        <label for="user-status">Statut</label>
+                        <select id="user-status" name="status" required>
+                            <option value="active">✅ Actif</option>
+                            <option value="inactive">⏸️ Inactif</option>
+                            <option value="suspended">🚫 Suspendu</option>
+                        </select>
+                        <i class="field-icon fas fa-flag"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="user-address">Adresse</label>
+                    <textarea id="user-address" name="address" rows="2" placeholder="Adresse complète..."></textarea>
+                    <i class="field-icon fas fa-map-marker-alt"></i>
+                </div>
+
+                <div class="form-group" id="password-group">
+                    <label for="user-password">Mot de passe</label>
+                    <input type="password" id="user-password" name="password" placeholder="Minimum 6 caractères" minlength="6">
+                    <i class="field-icon fas fa-lock"></i>
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>Mot de passe requis (min 6 caractères)</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeUserModal()">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button type="submit" class="add-btn" id="submitUserBtn">
+                        <span class="loading-spinner"></span>
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

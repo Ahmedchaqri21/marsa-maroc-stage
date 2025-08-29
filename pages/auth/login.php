@@ -649,8 +649,8 @@ if (isset($_SESSION['login_message'])) {
             loginBtn.disabled = true;
             
             try {
-                // Call authentication API
-                const response = await fetch('api/auth.php', {
+                // Call authentication API with correct path
+                const response = await fetch('../../api/auth.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -661,12 +661,21 @@ if (isset($_SESSION['login_message'])) {
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Redirect based on user role from database
-                    if (result.user.role === 'admin' || result.user.role === 'manager') {
-                        window.location.href = 'admin-dashboard.php';
-                    } else {
-                        window.location.href = 'user-dashboard.php';
-                    }
+                    // Save credentials if remember me is checked (before redirect)
+                    saveCredentials(username, password);
+
+                    // Show success notification
+                    showRememberMeNotification('Connexion réussie!');
+
+                    // Small delay to show the notification before redirect
+                    setTimeout(() => {
+                        // Redirect based on user role from database
+                        if (result.user.role === 'admin' || result.user.role === 'manager') {
+                            window.location.href = '../admin/dashboard.php';
+                        } else {
+                            window.location.href = '../user/dashboard.php';
+                        }
+                    }, 500);
                 } else {
                     showError(result.error || 'Erreur d\'authentification');
                 }
@@ -696,9 +705,142 @@ if (isset($_SESSION['login_message'])) {
             alert('Contactez l\'administrateur système pour réinitialiser votre mot de passe.\n\nEmail: admin@marsamaroc.ma\nTél: +212 5XX XX XX XX');
         }
         
-        // Auto-focus on username field
+        // Auto-focus on username field and load saved credentials
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('username').focus();
+
+            // Load saved credentials from cookies if remember me was checked
+            loadSavedCredentials();
+        });
+
+        // Cookie management functions
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;secure;samesite=strict`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+        }
+
+        // Function to save credentials when remember me is checked
+        function saveCredentials(username, password) {
+            const rememberMe = document.getElementById('remember').checked;
+
+            if (rememberMe) {
+                // Encode credentials for security (basic encoding, not encryption)
+                const encodedUsername = btoa(username);
+                const encodedPassword = btoa(password);
+
+                setCookie('marsa_remember_user', encodedUsername, 30); // 30 days
+                setCookie('marsa_remember_pass', encodedPassword, 30); // 30 days
+                setCookie('marsa_remember_me', 'true', 30);
+            } else {
+                // Clear cookies if remember me is not checked
+                deleteCookie('marsa_remember_user');
+                deleteCookie('marsa_remember_pass');
+                deleteCookie('marsa_remember_me');
+            }
+        }
+
+        // Function to load saved credentials
+        function loadSavedCredentials() {
+            const rememberMe = getCookie('marsa_remember_me');
+
+            if (rememberMe === 'true') {
+                const savedUsername = getCookie('marsa_remember_user');
+                const savedPassword = getCookie('marsa_remember_pass');
+
+                if (savedUsername && savedPassword) {
+                    try {
+                        // Decode credentials
+                        const username = atob(savedUsername);
+                        const password = atob(savedPassword);
+
+                        // Fill the form
+                        document.getElementById('username').value = username;
+                        document.getElementById('password').value = password;
+                        document.getElementById('remember').checked = true;
+
+                        // Add visual indicator that credentials were loaded
+                        showRememberMeNotification('Identifiants chargés automatiquement');
+                    } catch (error) {
+                        console.error('Erreur lors du décodage des identifiants sauvegardés:', error);
+                        // Clear corrupted cookies
+                        deleteCookie('marsa_remember_user');
+                        deleteCookie('marsa_remember_pass');
+                        deleteCookie('marsa_remember_me');
+                    }
+                }
+            }
+        }
+
+        // Function to show remember me notification
+        function showRememberMeNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                z-index: 10000;
+                font-size: 14px;
+                font-weight: 500;
+                opacity: 0;
+                transform: translateX(100%);
+                transition: all 0.3s ease;
+            `;
+
+            notification.innerHTML = `
+                <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                ${message}
+            `;
+
+            document.body.appendChild(notification);
+
+            // Animation d'apparition
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+
+            // Animation de disparition
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Handle remember me checkbox changes
+        document.getElementById('remember').addEventListener('change', function() {
+            if (!this.checked) {
+                // If unchecked, clear saved credentials
+                deleteCookie('marsa_remember_user');
+                deleteCookie('marsa_remember_pass');
+                deleteCookie('marsa_remember_me');
+                showRememberMeNotification('Identifiants supprimés');
+            }
         });
         
         // Clear error on input
@@ -712,4 +854,3 @@ if (isset($_SESSION['login_message'])) {
     </script>
 </body>
 </html>
- 
