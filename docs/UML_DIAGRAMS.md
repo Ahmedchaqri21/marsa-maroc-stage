@@ -475,84 +475,98 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    subgraph "Couche Présentation"
+    subgraph "🖥️ Couche Présentation"
         WebUI[Interface Web]
         AdminPanel[Panneau Admin]
         UserDash[Tableau de bord Utilisateur]
     end
     
-    subgraph "Couche Application"
-        AuthController[Contrôleur Auth]
-        UserController[Contrôleur Utilisateurs]
-        EmplacementController[Contrôleur Emplacements]
-        ReservationController[Contrôleur Réservations]
-        StatsController[Contrôleur Statistiques]
+    subgraph "⚙️ Couche Application"
+        AuthCtrl[Contrôleur Auth]
+        UserCtrl[Contrôleur Utilisateurs]
+        EmplCtrl[Contrôleur Emplacements]
+        ReservCtrl[Contrôleur Réservations]
+        StatsCtrl[Contrôleur Statistiques]
     end
     
-    subgraph "Couche Services"
-        AuthService[Service Authentification]
-        EmailService[Service Email]
-        PaymentService[Service Paiement]
-        ReportService[Service Rapports]
+    subgraph "🔧 Couche Services"
+        AuthSvc[Service Authentification]
+        EmailSvc[Service Email]
+        PaySvc[Service Paiement]
+        ReportSvc[Service Rapports]
     end
     
-    subgraph "Couche Données"
+    subgraph "💾 Couche Données"
         UserDAO[DAO Utilisateurs]
-        EmplacementDAO[DAO Emplacements]
-        ReservationDAO[DAO Réservations]
-        PaymentDAO[DAO Paiements]
+        EmplDAO[DAO Emplacements]
+        ReservDAO[DAO Réservations]
+        PayDAO[DAO Paiements]
     end
     
-    subgraph "Base de Données"
+    subgraph "🗄️ Base de Données"
         MySQL[(MySQL Database)]
     end
     
-    subgraph "Services Externes"
+    subgraph "🌐 Services Externes"
         EmailProvider[Fournisseur Email]
-        PaymentGateway[Passerelle Paiement]
+        PaymentGW[Passerelle Paiement]
     end
     
-    %% Connexions Présentation -> Application
-    WebUI --> AuthController
-    WebUI --> UserController
-    WebUI --> EmplacementController
-    WebUI --> ReservationController
+    %% Connexions principales
+    WebUI --> AuthCtrl
+    WebUI --> EmplCtrl
+    WebUI --> ReservCtrl
     
-    AdminPanel --> UserController
-    AdminPanel --> EmplacementController
-    AdminPanel --> ReservationController
-    AdminPanel --> StatsController
+    AdminPanel --> UserCtrl
+    AdminPanel --> EmplCtrl
+    AdminPanel --> ReservCtrl
+    AdminPanel --> StatsCtrl
     
-    UserDash --> AuthController
-    UserDash --> ReservationController
-    UserDash --> EmplacementController
+    UserDash --> AuthCtrl
+    UserDash --> ReservCtrl
+    UserDash --> EmplCtrl
     
-    %% Connexions Application -> Services
-    AuthController --> AuthService
-    UserController --> EmailService
-    ReservationController --> EmailService
-    ReservationController --> PaymentService
-    StatsController --> ReportService
+    %% Services
+    AuthCtrl --> AuthSvc
+    UserCtrl --> EmailSvc
+    ReservCtrl --> EmailSvc
+    ReservCtrl --> PaySvc
+    StatsCtrl --> ReportSvc
     
-    %% Connexions Contrôleurs -> DAO
-    AuthController --> UserDAO
-    UserController --> UserDAO
-    EmplacementController --> EmplacementDAO
-    ReservationController --> ReservationDAO
-    ReservationController --> PaymentDAO
-    StatsController --> UserDAO
-    StatsController --> EmplacementDAO
-    StatsController --> ReservationDAO
+    %% Accès aux données
+    AuthCtrl --> UserDAO
+    UserCtrl --> UserDAO
+    EmplCtrl --> EmplDAO
+    ReservCtrl --> ReservDAO
+    ReservCtrl --> PayDAO
+    StatsCtrl --> UserDAO
+    StatsCtrl --> EmplDAO
+    StatsCtrl --> ReservDAO
     
-    %% Connexions DAO -> Base de données
+    %% Base de données
     UserDAO --> MySQL
-    EmplacementDAO --> MySQL
-    ReservationDAO --> MySQL
-    PaymentDAO --> MySQL
+    EmplDAO --> MySQL
+    ReservDAO --> MySQL
+    PayDAO --> MySQL
     
-    %% Connexions Services -> Externes
-    EmailService --> EmailProvider
-    PaymentService --> PaymentGateway
+    %% Services externes
+    EmailSvc --> EmailProvider
+    PaySvc --> PaymentGW
+    
+    %% Styles
+    classDef presentation fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef application fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef service fill:#e8f5e8,stroke:#388e3c,stroke-width:2px
+    classDef data fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+    classDef database fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+    classDef external fill:#f1f8e9,stroke:#689f38,stroke-width:2px
+    
+    class WebUI,AdminPanel,UserDash presentation
+    class AuthCtrl,UserCtrl,EmplCtrl,ReservCtrl,StatsCtrl application
+    class AuthSvc,EmailSvc,PaySvc,ReportSvc service
+    class UserDAO,EmplDAO,ReservDAO,PayDAO data
+    class MySQL database
+    class EmailProvider,PaymentGW external
 ```
 
 ---
